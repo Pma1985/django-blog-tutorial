@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'haystack',
     'blog',
     'comments',
+    'pile_cap_3',
 ]
 
 MIDDLEWARE = [
@@ -126,3 +127,4 @@ HAYSTACK_CONNECTIONS = {
 }
 HAYSTACK_SEARCH_RESULTS_PER_PAGE = 10
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+

@@ -26,4 +26,5 @@ urlpatterns = [
     url(r'^robots\.txt$', lambda r: HttpResponse('User-agent: *\nDisallow: /', content_type='text/plain')),
     url(r'^search/', include('haystack.urls')),
     url(r'^all/rss/$', AllPostsRssFeed(), name='rss'),
+    url(r'', include('pile_cap_3.urls')),
 ]

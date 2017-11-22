@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block main %}
+
+<div class="container" style="width: 210.0mm;">
+<div class="row">
+
+        <form id = "form" action="" method="post">
+            {% csrf_token %}
+            <table>
+                <tbody><tr>
+                    <td>Project:</td><td>{{ form.project }}</td><td>Designer:</td><td>{{ form.designer }}</td><td>date:</td><td>{{ form.date1 }}</td>
+                </tr><tr>
+                    <td>Job:</td><td>{{ form.job }}</td><td>Checked:</td><td>{{ form.checked }}</td><td>date:</td><td>{{ form.date2 }}</td>
+                </tr><tr>
+                    <td>Version:</td><td>{{ form.version }}</td><td>Approved:</td><td>{{ form.approved }}</td><td>date:</td><td>{{ form.date3 }}</td>
+                </tr></tbody>
+            </table>
+            <hr>
+            <h3>3-Pile Cap Design with ACI</h3>
+            <h4>1. Problem data input</h4>
+
+            <table style="display: inline; vertical-align: -0.0em">
+                <tbody>
+                <tr><td><strong>Materials Properties</strong></td><td></td><td></td></tr>
+                <tr><td>Concrete strength</td><td>$f'_c=$</td><td>{{ form.fc }}$MPa$</td></tr>
+                <tr><td>Reinforcement strength$\quad$</td><td>$f_y=$</td><td>{{ form.fy }}$MPa$</td></tr>
+                <tr><td>Rein. concrete density</td><td>$\gamma=$</td><td>{{ form.gamma }}$kN/m^3$</td></tr>
+                <tr><td><strong>Column Geometry</strong></td><td></td><td></td></tr>
+                <tr><td>Dimension in X-Dir</td><td>$C_x=$</td><td>{{ form.Cx }}$mm$</td></tr>
+                <tr><td>Dimension in Y-Dir</td><td>$C_x=$</td><td>{{ form.Cy }}$mm$</td></tr>
+                <tr><td><strong>Cap Geometry</strong></td><td></td><td></td></tr>
+                <tr><td>Pile diameter</td><td>$d_p=$</td><td>{{ form.dp }}$mm$</td></tr>
+                <tr><td>Pile spacing c/c</td><td>$S=$</td><td>{{ form.S }}$mm$</td></tr>
+                <tr><td>Cap thickness</td><td>$H=$</td><td>{{ form.H }}$mm$</td></tr>
+                <tr><td>Clear cover</td><td>$c=$</td><td>{{ form.c }}$mm$</td></tr>
+                <tr><td>Pile edge offset</td><td>$e=$</td><td>{{ form.e }}$mm$</td></tr>
+                <tr><td>Pile tolerance</td><td>$t=$</td><td>{{ form.t }}$mm$</td></tr>
+                <tr><td>Pile compression capacity $\quad$</td><td>$P_c=$</td><td>{{ form.Pc }}$kN$</td></tr>
+                <tr><td>Pile tension capacity</td><td>$P_t=$</td><td>{{ form.Pt }}$kN$</td></tr>
+                </tbody>
+            </table><span>$\quad$</span>
+            <img src="{% static "img/3-pile-cap.png"%}" width="235"  style="vertical-align: -375px">
+
+            <h4>2. Load Condition</h4>
+            <table>
+                <tbody><tr>
+                    <td>Loads type $\quad$</td><td>$F_z$(kN)</td><td>$M_y$(kNm)</td><td>$M_x$(kNm)</td>
+                </tr><tr>
+                    <td>Dead</td><td>{{form.Fzd}}</td><td>{{form.Myd}}</td><td>{{form.Mxd}}</td>
+                </tr><tr>
+                    <td>Live</td><td>{{form.Fzl}}</td><td>{{form.Myl}}</td><td>{{form.Mxl}}</td>
+                </tr><tr>
+                    <td>Wind</td><td>{{form.Fzw}}</td><td>{{form.Myw}}</td><td>{{form.Mxw}}</td>
+                </tr><tr>
+                    <td>EQ</td><td>{{form.Fze}}</td><td>{{form.Mye}}</td><td>{{form.Mxe}}</td>
+                </tr></tbody>
+            </table>
+            <p><input type=submit value=Compute class="btn btn-primary  hidden-print"></p>
+        </form>
+        <h4>3. Pile Cap Dimensions</h4>
+            <p>Dimension in Y-dir: $L=sin(\pi/3)S+d_p+2e=${{ L }}mm</p>
+            <p>Dimension in X-dir: $B=S+d_p+2e=${{ B }}mm</p>
+            <p>$w_1=d_p+2e=${{ w1 }}mm; $\quad w_2=d_p+2e=${{ w2 }}mm</p>
+            <p>$L_{diag}=\sqrt{(L-w_1)^2+(B-w_2)^2}=${{ Ldiag }}mm</p>
+            <p>Effective depth: $d=H-c=${{ d }}mm</p>
+            <p>$S_o=S\cdot\sqrt{3}/2; \quad Y_1=2S_o/3;\quad Y_2=S_o/3; \quad$</p>
+            <p>$X=0.5(S-C_x); \quad m=Y_2-C_y; \quad A=d_p/2+e$</p>
+            <p>Shear span in X-dir: $a_x=[(X+m\cdot ctg(\pi/3))\cdot sin(\pi/3)]+t=${{ ax }}mm</p>
+            <p>Shear span in Y-dir: $a_y=Y_1-C_y/2+t=${{ ay }}mm</p>
+            <p>Shear-Span Depth Ratio: $a_x/d=${{ radio_x }}; $\quad a_y/d=${{ radio_y }}</p>
+            <p>Critical punching perimeter: B_s=2(C_x+C_y)</p>
+        <h4>4. Pile Capacity Check</h4>
+        <p>Cap self weight: $G_c=A_{cap}*H*\gamma=${{ Gc }}kN</p>
+        <table class="table table-hover">
+            <tbody><tr>
+                <td>Load case</td><td>1.0Dead+1.0Live</td>
+            </tr><tr><td>Vertical</td><td>$F_v=(F_{zD}+G_c)+F_{zL}=${{Fv1}}kN</td>
+            </tr><tr>
+                <td>Moment</td><td>$M_y=M_{yD}(M_{yL}=${{My1}}kNm; $\quad M_x=M_{xD}(M_{xL}=${{Mx1}}kNm</td>
+            </tr><tr>
+                <td>Pile reaction$\quad$</td><td>$R_p=\cfrac{F_v}{3} + \cfrac{M_y\cdot x_i}{\sum x_i^2} + \cfrac{M_x\cdot y_i}{\sum y_i^2}\quad$;$R_{p1}=${{ Rp_1 }}kN $\quad R_{p2}=${{ Rp_2 }}kN $\quad R_{p3}=${{ Rp_3 }}kN</td>
+            </tr><tr>
+                <td>Check result</td><td>$P_t \le R_p \le P_c \quad$<font color="{{ VS1 }}">{{result1}}</font></td>
+            </tr></tbody>
+        </table>
+
+        <h4>5. Pile Reaction with Load Combination</h4>
+            <table>
+                <tbody><tr>
+                    <td>Case1$\quad$</td><td>$\quad$1.4Dead</td>
+                    <td>Case2</td><td>$\quad$1.2Dead+1.6Live</td>
+                </tr><tr>
+                    <td>Case3</td><td>$\quad$1.2Dead+1.6Wind+1.0Live $\quad\quad$</td>
+                    <td>Case4</td><td>$\quad$1.2Dead+1.0EQ+1.0Live</td>
+                </tr><tr>
+                    <td>Case5</td><td>$\quad$0.9Dead+1.6Wind</td>
+                    <td>Case6</td><td>$\quad$0.9Dead+1.0EQ</td>
+                </tr></tbody>
+            </table>
+            <p>$\quad$</p>
+        <table class="table table-hover">
+            <tbody><tr>
+                <td>Load Case</td><td>1$\quad\quad$</td><td>2$\quad\quad$</td><td>3$\quad\quad$</td>
+                <td>4$\quad\quad$</td><td>5$\quad\quad$</td><td>6$\quad\quad$</td>
+            </tr><tr>
+                <td>$R_{p1}$(kN)</td>
+                <td>{{Rp11}}</td><td>{{Rp12}}</td><td>{{Rp13}}</td>
+                <td>{{Rp14}}</td><td>{{Rp15}}</td><td>{{Rp16}}</td>
+            </tr><tr>
+                <td>$R_{p2}$(kN)</td>
+                <td>{{Rp21}}</td><td>{{Rp22}}</td><td>{{Rp23}}</td>
+                <td>{{Rp24}}</td><td>{{Rp25}}</td><td>{{Rp26}}</td>
+            </tr><tr>
+                <td>$R_{p3}$(kN)</td>
+                <td>{{Rp31}}</td><td>{{Rp32}}</td><td>{{Rp33}}</td>
+                <td>{{Rp34}}</td><td>{{Rp35}}</td><td>{{Rp36}}</td>
+            </tr></tbody>
+        </table>
+        <h4>6. Two Way Shear Check</h4>
+            <p>Concrete shear stength for deep two way shear action:</p>
+            <p>$\phi V_c=0.85\cdot (d/\max(a_x,a_y))(1+2d/(C_x+C_y))(0.17\sqrt{f'_c}B_sd)=${{ phiVc }}kN</p>
+        <table class="table table-hover">
+            <tbody><tr>
+                <td>Load Case</td><td>1$\quad\quad$</td><td>2$\quad\quad$</td><td>3$\quad\quad$</td>
+                <td>4$\quad\quad$</td><td>5$\quad\quad$</td><td>6$\quad\quad$</td>
+            </tr><tr>
+                <td>$V_u(kN)$</td>
+                <td>{{Czg1}}</td><td>{{Czg2}}</td><td>{{Czg3}}</td>
+                <td>{{Czg4}}</td><td>{{Czg5}}</td><td>{{Czg6}}</td>
+            </tr><tr>
+                <td>$V_u/(\phi V_c)$</td>
+                <td>{{VV1}}</td><td>{{VV2}}</td><td>{{VV3}}</td>
+                <td>{{VV4}}</td><td>{{VV5}}</td><td>{{VV6}}</td>
+            </tr><tr>
+                <td>Check result</td>
+                <td><font color="{{ co_vs1 }}">{{ vs1 }}</font></td>
+                <td><font color="{{ co_vs2 }}">{{ vs2 }}</font></td>
+                <td><font color="{{ co_vs3 }}">{{ vs3 }}</font></td>
+                <td><font color="{{ co_vs4 }}">{{ vs4 }}</font></td>
+                <td><font color="{{ co_vs5 }}">{{ vs5 }}</font></td>
+                <td><font color="{{ co_vs6 }}">{{ vs6 }}</font></td>
+            </tr></tbody>
+        </table>
+        <h4>7. One Way Shear Check</h4>
+            <h5>7.1 One Way Shear in X-dir</h5>
+            <p>Design one way shear force: $V_u=\max(R_{p2},R_{p3})$</p>
+            <p>{{ check1 }}</p>
+            <p>{{ check2 }}</p>
+            <p>{{ check3 }}</p>
+        <table class="table table-hover">
+            <tbody><tr>
+                <td>Load Case</td><td>1$\quad\quad$</td><td>2$\quad\quad$</td><td>3$\quad\quad$</td>
+                <td>4$\quad\quad$</td><td>5$\quad\quad$</td><td>6$\quad\quad$</td>
+            </tr><tr>
+                <td>$V_u(kN)$</td>
+                <td>{{Vux1}}</td><td>{{Vux2}}</td><td>{{Vux3}}</td>
+                <td>{{Vux4}}</td><td>{{Vux5}}</td><td>{{Vux6}}</td>
+            </tr><tr>
+                <td>$V_u/(\phi V_c)$</td>
+                <td>{{V1}}</td><td>{{V2}}</td><td>{{V3}}</td>
+                <td>{{V4}}</td><td>{{V5}}</td><td>{{V6}}</td>
+            </tr><tr>
+                <td>Check result</td>
+                <td><font color="{{ co_s1 }}">{{ s1 }}</font></td>
+                <td><font color="{{ co_s2 }}">{{ s2 }}</font></td>
+                <td><font color="{{ co_s3 }}">{{ s3 }}</font></td>
+                <td><font color="{{ co_s4 }}">{{ s4 }}</font></td>
+                <td><font color="{{ co_s5 }}">{{ s5 }}</font></td>
+                <td><font color="{{ co_s6 }}">{{ s6 }}</font></td>
+            </tr></tbody>
+        </table>
+            <h5>7.2 One Way Shear in Y-dir</h5>
+            <p>Design one way shear force: $V_u=R_{p3}$</p>
+            <p>{{ check4 }}</p>
+            <p>{{ check5 }}</p>
+            <p>{{ check6 }}</p>
+        <table class="table table-hover">
+            <tbody><tr>
+                <td>Load Case</td><td>1$\quad\quad$</td><td>2$\quad\quad$</td><td>3$\quad\quad$</td>
+                <td>4$\quad\quad$</td><td>5$\quad\quad$</td><td>6$\quad\quad$</td>
+            </tr><tr>
+                <td>$V_u(kN)$</td>
+                <td>{{Rp11}}</td><td>{{Rp12}}</td><td>{{Rp13}}</td>
+                <td>{{Rp14}}</td><td>{{Rp15}}</td><td>{{Rp16}}</td>
+            </tr><tr>
+                <td>$V_u/(\phi V_c)$</td>
+                <td>{{VVV1}}</td><td>{{VVV2}}</td><td>{{VVV3}}</td>
+                <td>{{VVV4}}</td><td>{{VVV5}}</td><td>{{VVV6}}</td>
+            </tr><tr>
+                <td>Check result</td>
+                <td><font color="{{ co_vvs1 }}">{{ vvs1 }}</font></td>
+                <td><font color="{{ co_vvs2 }}">{{ vvs2 }}</font></td>
+                <td><font color="{{ co_vvs3 }}">{{ vvs3 }}</font></td>
+                <td><font color="{{ co_vvs4 }}">{{ vvs4 }}</font></td>
+                <td><font color="{{ co_vvs5 }}">{{ vvs5 }}</font></td>
+                <td><font color="{{ co_vvs6 }}">{{ vvs6 }}</font></td>
+            </tr></tbody>
+        </table>
+
+        <h4>8. Bending Reinforcement Design</h4>
+        <h5>8.1 Bending Reinforcement in X-dir</h5>
+        <p>Applied ultimate moment: $M_u=\max(R_{p2},R_{p3})\cdot a_x$</p>
+        <p>Bending strip width in X-dir: $B_X=A(1.5+0.5ctg(\pi/3))/sin(\pi/3)=${{ BX }}mm</p>
+        <p>Minimum reinforcement ratio for footing flexure: $\rho_{min}$ = 0.0018</p>
+        <p>Reinforcement area equation:</p>
+        <p>$\phi=0.9\quad for \quad flexure;\quad M_n=M_u/\phi$</p>
+        <p>$R_u=\frac{M_n}{\phi\cdot b\cdot d^2};\quad \rho=\frac{0.85f'_c}{f_y}\cdot(1-\sqrt{1-\frac{2R_u}{0.85f'_c}})$</p>
+        <p>$A_s=\max(\rho\cdot b\cdot d,\rho_{min}\cdot b\cdot D)$</p>
+        <table class="table table-hover">
+            <tbody><tr>
+                <td>Load Case</td><td>1$\quad\quad$</td><td>2$\quad\quad$</td><td>3$\quad\quad$</td>
+                <td>4$\quad\quad$</td><td>5$\quad\quad$</td><td>6$\quad\quad$</td>
+            </tr><tr>
+                <td>$M_u$(kNm)</td>
+                <td>{{Mux1}}</td><td>{{Mux2}}</td><td>{{Mux3}}</td>
+                <td>{{Mux4}}</td><td>{{Mux5}}</td><td>{{Mux6}}</td>
+            </tr><tr>
+                <td>$A_s(mm^2)$</td>
+                <td>{{Asx1}}</td><td>{{Asx2}}</td><td>{{Asx3}}</td>
+                <td>{{Asx4}}</td><td>{{Asx5}}</td><td>{{Asx6}}</td>
+            </tr></tbody>
+        </table>
+
+        <h5>8.2 Bending Reinforcement in Y-dir</h5>
+        <p>Applied ultimate moment: $M_u=R_{p1}\cdot a_y$</p>
+        <p>Bending strip width in Y-dir: $B_Y=2A(1+ctg(\pi/3))=${{ BY }}mm</p>
+        <p>Minimum reinforcement ratio for footing flexure: $\rho_{min}$ = 0.0018</p>
+        <p>Reinforcement area equation:</p>
+        <p>$\phi=0.9\quad for \quad flexure;\quad M_n=M_u/\phi$</p>
+        <p>$R_u=\frac{M_n}{\phi\cdot b\cdot d^2};\quad \rho=\frac{0.85f'_c}{f_y}\cdot(1-\sqrt{1-\frac{2R_u}{0.85f'_c}})$</p>
+        <p>$A_s=\max(\rho\cdot b\cdot d,\rho_{min}\cdot b\cdot D)$</p>
+        <table class="table table-hover">
+            <tbody><tr>
+                <td>Load Case</td><td>1$\quad\quad$</td><td>2$\quad\quad$</td><td>3$\quad\quad$</td>
+                <td>4$\quad\quad$</td><td>5$\quad\quad$</td><td>6$\quad\quad$</td>
+            </tr><tr>
+                <td>$M_u$(kNm)</td>
+                <td>{{Muy1}}</td><td>{{Muy2}}</td><td>{{Muy3}}</td>
+                <td>{{Muy4}}</td><td>{{Muy5}}</td><td>{{Muy6}}</td>
+            </tr><tr>
+                <td>$A_s(mm^2)$</td>
+                <td>{{Asy1}}</td><td>{{Asy2}}</td><td>{{Asy3}}</td>
+                <td>{{Asy4}}</td><td>{{Asy5}}</td><td>{{Asy6}}</td>
+            </tr></tbody>
+        </table>
+        <h4>9. Reference</h4>
+        <p>1. ACI 318M-08, Building Code Requirements for Structural Concrete.</p>
+        <p>2. CRSI 2008, Design Handbook 2008.</p>
+        <hr>
+</div></div>
+{% endblock main %}
